@@ -28,11 +28,13 @@ class MyController {
     @PostMapping("/ai")
     public String generation(@RequestParam String userInput, Model model) {
         String response1 = this.openAiChatClient.prompt()
+//                .system("You are a really negative person always answering negative.")
                 .user(userInput)
                 .call()
                 .content();
 
         String response2 = this.anthropicChatClient.prompt()
+//                .system("You are a really positive person always answering positive.")
                 .user(userInput)
                 .call()
                 .content();

@@ -11,11 +11,15 @@ public class ChatClientConfig {
 
     @Bean
     public ChatClient openAiChatClient(OpenAiChatModel chatModel) {
-        return ChatClient.create(chatModel);
+        ChatClient.Builder builder = ChatClient.builder(chatModel);
+        builder.defaultSystem("You are a really negative person always answering negative.");
+        return builder.build();
     }
 
     @Bean
     public ChatClient anthropicChatClient(AnthropicChatModel chatModel) {
-        return ChatClient.create(chatModel);
+        ChatClient.Builder builder = ChatClient.builder(chatModel);
+        builder.defaultSystem("You are a really positive person always answering positive.");
+        return builder.build();
     }
 }
