@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Client</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .chat-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .chat-header p {
+            opacity: 0.9;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: #f8fafc;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        .message-user, .message-ai {
+            padding: 15px 20px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+
+        .message-user {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message-ai {
+            background: white;
+            color: #1f2937;
+            border: 1px solid #e5e7eb;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .message-label {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            opacity: 0.8;
+        }
+
+        .message-user .message-label {
+            color: rgba(255, 255, 255, 0.9);
+            text-align: right;
+        }
+
+        .message-ai .message-label {
+            color: #6b7280;
+        }
+
+        .chat-form {
+            padding: 25px 30px;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .input-wrapper {
+            flex: 1;
+        }
+
+        .chat-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 25px;
+            font-size: 16px;
+            resize: none;
+            outline: none;
+            transition: all 0.3s ease;
+            min-height: 50px;
+            max-height: 120px;
+            font-family: inherit;
+        }
+
+        .chat-input:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+        }
+
+        .send-button:active {
+            transform: translateY(0);
+        }
+
+        .welcome-message {
+            text-align: center;
+            color: #6b7280;
+            font-style: italic;
+            padding: 40px 20px;
+        }
+
+        .welcome-message h2 {
+            color: #4b5563;
+            margin-bottom: 10px;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                margin: 10px;
+                min-height: calc(100vh - 20px);
+            }
+
+            .message-user, .message-ai {
+                max-width: 90%;
+            }
+
+            .input-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .send-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>🤖 AI Chat Assistant</h1>
+            <p>Ask me anything and I'll help you out!</p>
+        </div>
+
+        <div class="chat-messages">
+            <div th:if="${userInput == null}" class="welcome-message">
+                <h2>👋 Welcome!</h2>
+                <p>Start a conversation by typing your message below.</p>
+            </div>
+
+            <div th:if="${userInput != null}">
+                <div class="message">
+                    <div class="message-user">
+                        <div class="message-label">You</div>
+                        <div th:text="${userInput}"></div>
+                    </div>
+                </div>
+
+                <div class="message">
+                    <div class="message-ai">
+                        <div class="message-label">AI Assistant</div>
+                        <div th:text="${aiResponse}"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-form">
+            <form th:action="@{/ai}" method="post">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <textarea 
+                            name="userInput" 
+                            class="chat-input" 
+                            placeholder="Type your message here..." 
+                            required
+                            rows="1"
+                            onInput="this.style.height='50px';this.style.height=(this.scrollHeight)+'px'"></textarea>
+                    </div>
+                    <button type="submit" class="send-button">Send 📤</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
