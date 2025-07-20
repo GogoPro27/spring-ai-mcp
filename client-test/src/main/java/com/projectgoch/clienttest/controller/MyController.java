@@ -1,6 +1,7 @@
 package com.projectgoch.clienttest.controller;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,6 +33,7 @@ class MyController {
                 .user(userInput)
                 .call()
                 .content();
+        SimpleLoggerAdvisor advisor = new SimpleLoggerAdvisor();
 
         String response2 = this.anthropicChatClient.prompt()
 //                .system("You are a really positive person always answering positive.")
