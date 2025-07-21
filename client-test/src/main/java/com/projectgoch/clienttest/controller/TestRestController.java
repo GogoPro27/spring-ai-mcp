@@ -4,11 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.projectgoch.clienttest.pojo.ActorsFilms;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -29,5 +29,15 @@ public class TestRestController {
                 .entity(ActorsFilms.class);
         ObjectMapper objectMapper = new ObjectMapper();
         return ResponseEntity.ok(objectMapper.writeValueAsString(actorsFilms));
+    }
+
+    @GetMapping("/actorMoviesMultiple")
+    public ResponseEntity<List<ActorsFilms>> getActorMovies(@RequestParam List<String> actors) {
+        List<ActorsFilms> actorsFilms = openAiChatClient.prompt()
+                .user(String.format("%s %s.","Generate the filmography of 5 movies for ",String.join(" and ",actors)))
+                .call()
+                .entity(new ParameterizedTypeReference<>() {
+                });
+        return ResponseEntity.ok(actorsFilms);
     }
 }
