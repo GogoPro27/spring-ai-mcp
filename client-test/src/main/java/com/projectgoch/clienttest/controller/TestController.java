@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Objects;
 
 @Controller
-@RestController
 class TestController {
 
     private final ChatClient openAiChatClient;
@@ -66,16 +65,5 @@ class TestController {
         model.addAttribute("userInput", userInput);
         model.addAttribute("aiResponse", response);
         return "chat";
-    }
-
-    @GetMapping("/actorMovies/{actor}")
-    public ResponseEntity<String> actorMovies(@PathVariable String actor) throws JsonProcessingException {
-        ActorsFilms actorsFilms = openAiChatClient.prompt()
-                .user(u -> u.text("Generate the filmography of 5 movies for {actor}.")
-                        .param("actor", actor))
-                .call()
-                .entity(ActorsFilms.class);
-        ObjectMapper objectMapper = new ObjectMapper();
-        return ResponseEntity.ok(objectMapper.writeValueAsString(actorsFilms));
     }
 }

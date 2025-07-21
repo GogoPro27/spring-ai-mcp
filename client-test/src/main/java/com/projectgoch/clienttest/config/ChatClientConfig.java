@@ -5,11 +5,14 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class ChatClientConfig {
+    @Value("${local.llm.url}")
+    private String baseUrl;
 
     @Bean
     public ChatClient openAiChatClient(OpenAiChatModel chatModel) {
@@ -28,7 +31,7 @@ public class ChatClientConfig {
     @Bean
     public ChatClient localOpenAiChatModel() {
         OpenAiApi api = OpenAiApi.builder()
-                .baseUrl(System.getenv("LOCAL_LLM_URL"))
+                .baseUrl(baseUrl)
                 .apiKey("dummy-key")
                 .build();
         OpenAiChatOptions options = OpenAiChatOptions.builder()
