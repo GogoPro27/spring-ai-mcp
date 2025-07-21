@@ -3,6 +3,8 @@ package com.projectgoch.clienttest.config;
 import org.springframework.ai.anthropic.AnthropicChatModel;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,7 +14,7 @@ public class ChatClientConfig {
     @Bean
     public ChatClient openAiChatClient(OpenAiChatModel chatModel) {
         ChatClient.Builder builder = ChatClient.builder(chatModel);
-        builder.defaultSystem("You are a really negative person always answering negative.");
+        builder.defaultSystem("You are a pirate and you are always talking like a pirate and spamming pirate words.");
         return builder.build();
     }
 
@@ -22,4 +24,21 @@ public class ChatClientConfig {
         builder.defaultSystem("You are a really positive person always answering positive.");
         return builder.build();
     }
+
+    @Bean
+    public ChatClient localOpenAiChatModel() {
+        OpenAiApi api = OpenAiApi.builder()
+                .baseUrl(System.getenv("LOCAL_LLM_URL"))
+                .apiKey("dummy-key")
+                .build();
+        OpenAiChatOptions options = OpenAiChatOptions.builder()
+                .model("Qwen/Qwen3-14B-AWQ")
+                .temperature(0.5)
+                .build();
+
+        return ChatClient.builder(new OpenAiChatModel(api, options))
+                .defaultSystem("You are a really negative person always answering negative.")
+                .build();
+    }
+
 }
