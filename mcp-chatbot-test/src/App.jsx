@@ -6,7 +6,7 @@ function App() {
   ])
   const [inputMessage, setInputMessage] = useState('')
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (inputMessage.trim()) {
       const newMessage = {
         id: Date.now(),
@@ -16,15 +16,51 @@ function App() {
       setMessages([...messages, newMessage])
       setInputMessage('')
 
-      // Simulate bot response
-      setTimeout(() => {
-        const botResponse = {
-          id: Date.now() + 1,
-          text: "I'm a UI-only chatbot, so I can't actually respond meaningfully, but your message was received!",
-          sender: 'bot'
+      // Call the Spring Boot API
+      const botMessageId = Date.now() + 1
+      const initialBotMessage = {
+        id: botMessageId,
+        text: '',
+        sender: 'bot'
+      }
+      setMessages(prev => [...prev, initialBotMessage])
+
+      try {
+        const response = await fetch(`http://localhost:8080/gpt/ask?input=${encodeURIComponent(inputMessage)}`, {
+          method: 'POST'
+        })
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
         }
-        setMessages(prev => [...prev, botResponse])
-      }, 1000)
+
+        const reader = response.body.getReader()
+        const decoder = new TextDecoder()
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          const chunk = decoder.decode(value, { stream: true })
+
+          setMessages(prev => 
+            prev.map(msg => 
+              msg.id === botMessageId 
+                ? { ...msg, text: msg.text + chunk }
+                : msg
+            )
+          )
+        }
+      } catch (error) {
+        console.error('Error calling API:', error)
+        setMessages(prev => 
+          prev.map(msg => 
+            msg.id === botMessageId 
+              ? { ...msg, text: 'Sorry, I encountered an error while processing your request.' }
+              : msg
+          )
+        )
+      }
     }
   }
 
